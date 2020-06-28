@@ -1,0 +1,16 @@
+{
+  "name": "BaconBot",
+  "version": "1.0.0",
+  "description": "Role manager among other things",
+  "main": "bot.js",
+  "author": "Matteo Bir",
+  "dependencies": {
+    "-": "0.0.1",
+    "discord.io": "https://github.com/woor/discord.io/tarball/gateway_v6",
+    "discord.js": "^12.2.0",
+    "fs": "0.0.1-security",
+    "save": "^2.4.0",
+    "sqlite": "^4.0.11",
+    "winston": "^3.3.3"
+  }
+}
