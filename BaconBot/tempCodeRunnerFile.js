@@ -1,0 +1,1 @@
+var arr = Object.keys(servers[m.guild.id]["interests"]);

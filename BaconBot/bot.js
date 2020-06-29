@@ -2,6 +2,7 @@
 var Discord = require('discord.js');
 var logger = require('winston');
 var auth = require('./auth.json');
+var sys = require('sys');
 var database = require('./database.json');
 var fs = require('fs');
 const { Console } = require('winston/lib/winston/transports');
@@ -28,10 +29,8 @@ client.on('ready', function (evt) {
     logger.info('Logged in as: ');
     logger.info(client.username + ' - (' + client.id + ')');
     //client.channels.cache.get('general').send("Unfortunalty I went down... But I'm back now!");
-
-
-
 });
+
 client.login(auth.token);
 client.on('message', message => {
 
@@ -48,23 +47,26 @@ client.on('message', message => {
                 message.channel.send('Pong!');
                 break;
             case 'upupdowndownleftrightleftrightabstart':
-                message.channel.send('bot bot');
+                message.channel.send('Communist mode activated.');
                 break;
             case 'spicy':
                 message.channel.send('Mikey bot bot');
                 break;
             case 'help':
-                if (message.guild.owner.id == message.author.id || message.member.roles.some(role => role.name === servers[message.guild.id]["admin"])) {
+                if (message.guild.owner.id == message.author.id || message.member.roles.cache.find(role => role.name === servers[message.guild.id]["admin"])) {
+                    message.channel.send("*It is obviously very important that you spell all roles and text channels correctly*");
                     message.channel.send('"+new role-name" to assign that role to all incoming members');
                     message.channel.send('');
                 }
                 break;
+            case 'max is dumb':
+                break;
             case 'admin':
                 if (message.guild.owner.id == message.author.id || message.member.roles.some(role => role.name === servers[message.guild.id]["admin"])) {
                     if (args[1]) {
-                        var temp = ""
-                        for (var i = 1; i < args.length; i++) {
-                            temp += args[i]
+                        var temp = args[1];
+                        for (var i = 2; i < args.length; i++) {
+                            temp += " " + args[i]
                         }
                         servers[message.guild.id]["admin"] = temp;
                         message.channel.send("The role " + '"' + temp + '"' + " can now control me");
@@ -76,11 +78,11 @@ client.on('message', message => {
                 }
                 break;
             case 'new':
-                if (message.guild.owner.id == message.author.id || message.member.roles.some(role => role.name === servers[message.guild.id]["admin"])) {
+                if (message.guild.owner.id == message.author.id || message.member.roles.cache.find(role => role.name === servers[message.guild.id]["admin"])) {
                     if (args[1]) {
-                        var temp = ""
-                        for (var i = 1; i < args.length; i++) {
-                            temp += args[i]
+                        var temp = args[1];
+                        for (var i = 2; i < args.length; i++) {
+                            temp += " " + args[i]
                         }
                         servers[message.guild.id]["New Members"] = temp;
                         message.channel.send("I will add the role " + '"' + temp + '"' + " to all new members!");
@@ -92,11 +94,11 @@ client.on('message', message => {
                 }
                 break;
             case 'member':
-                if (message.guild.owner.id == message.author.id || message.member.roles.some(role => role.name === servers[message.guild.id]["admin"])) {
+                if (message.guild.owner.id == message.author.id || message.member.cache.find(role => role.name === servers[message.guild.id]["admin"])) {
                     if (args[1]) {
-                        var temp = ""
-                        for (var i = 1; i < args.length; i++) {
-                            temp += args[i]
+                        var temp = args[1];
+                        for (var i = 2; i < args.length; i++) {
+                            temp += " " + args[i]
                         }
 
                         try {
@@ -126,7 +128,7 @@ client.on('message', message => {
 
                         }
                     }
-                } else if (message.guild.owner.id == message.author.id || message.member.roles.some(role => role.name === servers[message.guild.id]["admin"])) {
+                } else if (message.guild.owner.id == message.author.id || message.member.roles.cache.find(role => role.name === servers[message.guild.id]["admin"])) {
                     message.channel.send('Hello!');
 
                 }
@@ -134,12 +136,60 @@ client.on('message', message => {
             case 'rules':
                 if (message.guild.owner.id == message.author.id || message.member.roles.some(role => role.name === servers[message.guild.id]["admin"])) {
                     if (args[1]) {
-                        var temp = ""
-                        for (var i = 1; i < args.length; i++) {
-                            temp += args[i]
+                        var temp = args[1]
+                        for (var i = 2; i < args.length; i++) {
+                            temp += " " + args[i]
                         }
+                        servers[message.guild.id]["rules"] = temp;
 
                     } else {
+
+                    }
+                }
+                break;
+            case 'interest':
+                if (message.guild.owner.id == message.author.id || message.member.roles.cache.find(role => role.name === servers[message.guild.id]["admin"])) {
+                    if (args[1]) {
+                        if (args[1].toLowerCase() == "add" && args[2]) {
+                            var interest = args[2];
+                            for (var i = 3; i < args.length; i++) {
+                                interest += " " + args[i];
+
+                            }
+                            var info = interest.split("   ")
+                            if (info[2]) {
+                                servers[message.guild.id]["interests"][info[0]] = [info[1], info[2].replace(/\s/g, '')];
+                                message.channel.send("Interest Saved!");
+                            }
+                            else {
+                                message.channel.send("Please make sure you format it correctly");
+                            }
+
+
+                        }
+                        if (args[1].toLowerCase() == "remove" && args[2]) {
+                            var temp = args[2];
+                            for (var i = 3; i < args.length; i++) {
+                                temp += " " + args[i];
+                            }
+                            if (servers[message.guild.id]["interests"].hasOwnProperty(temp)) {
+                                delete servers[message.guild.id]["interests"][temp];
+                            } else {
+                                message.channel.send("couldn't find an interst with that name");
+                            }
+                        }
+                        if (args[1].toLowerCase() == "server" && args[2]) {
+                            var temp = args[2];
+                            for (var i = 3; i < args.length; i++) {
+                                temp += " " + args[i];
+                            }
+                            servers[message.guild.id]["self-roles"] = temp;
+
+                        }
+                        saveData();
+                        updateSelfRoles(message);
+                    } else {
+                        message.channel.send('Usage: "+interest add/remove Interest-name   role to assign   emoji to react". seperate each after the name with three spaces. use add to change existing interests. With remove you only need to specify the name.')
 
                     }
                 }
@@ -167,31 +217,52 @@ client.on('messageReactionAdd', async (reaction, user) => {
             return;
         }
     }
-    console.log(reaction.message.channel.name);
-    if (reaction.message.channel.name.toLowerCase() == "rules") {
-        const role = user.guild.roles.cache.find(role => role.name === servers[message.guild.id]["Members"]);
-        const role1 = user.guild.roles.cache.find(role => role.name === servers[message.guild.id]["New Members"]);
+
+
+    if (reaction.message.channel.name == servers[reaction.message.guild.id]["rules"]) {
+        const role = user.guild.roles.cache.find(role => role.name === servers[reaction.message.guild.id]["Members"]);
+        const role1 = user.guild.roles.cache.find(role => role.name === servers[reaction.message.guild.id]["New Members"]);
         user.roles.add(role);
         user.roles.remove(role1);
     }
-    if (reaction.message.channel.name.toLowerCase() == "anti-rules") {
+    if (reaction.message.channel.name.toLowerCase() === servers[reaction.message.guild.id]["self-roles"]) {
+        console.log("Activated");
+        var arr = Object.keys(servers[reaction.message.guild.id]["interests"]);
+        for (var i = 0; i < arr.length; i++) {
+            if (reaction.emoji.name == servers[reaction.message.guild.id]["interests"][arr[i]][1]) {
+                console.log(servers[reaction.message.guild.id]["interests"][arr[i]][0]);
+                console.log("found emoji");
+                const role = reaction.message.guild.roles.cache.find(role => role.name === servers[reaction.message.guild.id]["interests"][arr[i]][0]);
+                const memberWhoReacted = reaction.message.guild.members.cache.find(member => member.id === user.id);
+                memberWhoReacted.roles.add(role);
+            }
+        }
 
     }
 });
 client.on("guildMemberAdd", (member) => {
-    if (servers[message.guild.id]["New Members"] != "") {
+    if (servers[member.guild.id]["New Members"] != "") {
         console.log(`New User "${member.user.username}" has joined "${member.guild.name}"`);
-        const role = member.guild.roles.cache.find(role => role.name === servers[message.guild.id]["New Members"]);
+        const role = member.guild.roles.cache.find(role => role.name === servers[member.guild.id]["New Members"]);
         member.roles.add(role);
+        member.send("Hello and welcome to " + member.guild.name + "!");
+        if (servers[member.guild.id]["self-roles"]) {
+            member.send("Feel free to navigate to the #self-roles text channel to let us know what you're intrested in!");
+        }
     }
 });
 client.on("guildCreate", guild => {
     console.log("Joined a new guild: " + guild.name);
-    servers[guild.id] = { "serverID": "", "New Members": "", "Members": "", "admin": "", "rules": "rules" };
+    if (servers[guild.id]) { } else {
+        servers[guild.id] = {
+            "serverID": "", "New Members": "", "Members": "", "admin": "", "rules": "rules", "self-roles": "self-roles",
+            "interest": {}
+        };
+    }
     console.log(servers);
     saveData()
-    //{ "serverID": "", "New Members": "", "Members": "", "admin": "", "rules": "rules" }
-    //Your other stuff like adding to guildArray
+    // { "serverID": "", "New Members": "", "Members": "", "admin": "", "rules": "rules" }
+    // Your other stuff like adding to guildArray
 })
 
 function saveData() {
@@ -201,4 +272,198 @@ function saveData() {
     });
 
 }
+function updateSelfRoles(m) {
+    if (m.guild.channels.cache.find(c => c.name.toLowerCase() === servers[m.guild.id]["self-roles"]) && !(Object.keys(servers[m.guild.id]["interests"]).length === 0)) {
+        m.guild.channels.cache.find(c => c.name.toLowerCase() === servers[m.guild.id]["self-roles"]).messages.fetch()
+            .then(messages => {
+                var messageExists;
+                messages.filter(msg => {
+                    console.log(msg.author.bot + " " + msg.channel.name);
+                    if (msg.author.bot && msg.channel.name === servers[m.guild.id]["self-roles"]) {
+                        messageExists = msg;
+                    }
+                });
+                var rolesChannel = m.guild.channels.cache.find(c => c.name.toLowerCase() === servers[m.guild.id]["self-roles"]);
+                if (!(messageExists)) {
+                    for (var i in servers[m.guild.id]["interests"]) {
+                        rolesChannel.send(i);
+                    }
+                } else {
+                    var arr = Object.keys(servers[m.guild.id]["interests"]);
+                    var edited = "`**React to this message to show your interests**`\n\n" + "`" + servers[m.guild.id]["interests"][arr[0]][1] + ": " + arr[0] + "`";
+                    messageExists.react(servers[m.guild.id]["interests"][arr[0]][1]);
+                    for (var i = 1; i < arr.length; i++) {
+                        edited += "\n\n" + "`" + servers[m.guild.id]["interests"][arr[i]][1] + ": " + arr[i] + "`";
+                        messageExists.react(servers[m.guild.id]["interests"][arr[i]][1]);
+                        console.log(servers[m.guild.id]["interests"][arr[i]][1]);
+
+                    }
+                    console.log(edited);
+                    messageExists.edit(edited);
+                }
+            });
+    } else {
+        console.log("no intersts or self-roles")
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
